@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDT WEXIANO - Smooth Neon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.4);
+            --danger: #ff2d55;
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Ultra Smooth Curve */
+        }
+
+        * { box-sizing: border-box; transition: var(--transition); }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; height: 100vh; overflow: hidden; }
+
+        /* --- LOGIN --- */
+        #loginOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid var(--accent); text-align: center; width: 380px; box-shadow: 0 0 30px var(--accent-glow); backdrop-filter: blur(15px); }
+
+        /* --- APP STRUCTURE --- */
+        #mainApp { display: none; height: 100vh; width: 100vw; }
+        .wrapper { display: flex; height: 100%; padding: 20px; gap: 20px; }
+
+        /* --- SMOOTH SIDEBAR --- */
+        .sidebar { 
+            width: 280px; background: var(--card-bg); border-radius: 24px; 
+            border: 1px solid var(--border); backdrop-filter: blur(20px); 
+            padding: 30px 18px; display: flex; flex-direction: column; z-index: 20;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+        }
+
+        .nav-link { 
+            width: 100%; padding: 15px 22px; border: 1px solid transparent; 
+            background: rgba(255,255,255,0.03); color: #94a3b8; cursor: pointer; 
+            border-radius: 16px; text-align: left; font-weight: 600; margin-bottom: 12px;
+            position: relative; overflow: hidden;
+        }
+
+        .nav-link:hover { 
+            color: var(--accent); 
+            background: rgba(0, 229, 255, 0.08);
+            transform: translateX(8px); /* Efek geser halus */
+            border-color: rgba(0, 229, 255, 0.3);
+        }
+
+        .nav-link.active { 
+            background: rgba(0, 229, 255, 0.15); 
+            color: var(--accent); 
+            border: 1px solid var(--accent); 
+            box-shadow: 0 0 20px var(--accent-glow);
+            font-weight: 800;
+            transform: translateX(10px);
+        }
+
+        /* --- CONTENT AREA --- */
+        .content { 
+            flex: 1; background: var(--card-bg); border-radius: 24px; 
+            border: 1px solid var(--border); backdrop-filter: blur(20px); 
+            padding: 40px; overflow-y: auto; z-index: 15;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.2);
+        }
+
+        /* Smooth Page Transition */
+        .page { display: none; animation: pageIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .page.active { display: block; }
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- NEON BUTTONS --- */
+        .btn { padding: 16px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; border: 1px solid transparent; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; }
+        
+        .btn-neon-blue { 
+            background: rgba(0, 229, 255, 0.1); color: var(--accent); border-color: var(--accent);
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
+        }
+        .btn-neon-blue:hover { 
+            background: var(--accent); color: #020617; 
+            box-shadow: 0 0 30px var(--accent); 
+            transform: translateY(-3px);
+        }
+
+        .btn-neon-red { 
+            background: rgba(255, 45, 85, 0.1); color: #ff2d55; border-color: #ff2d55;
+        }
+        .btn-neon-red:hover { 
+            background: #ff2d55; color: white; 
+            box-shadow: 0 0 25px #ff2d55; 
+            transform: translateY(-3px);
+        }
+
+        /* --- INPUTS & CARDS --- */
+        .card { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; }
+        input, textarea { 
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); 
+            border-radius: 12px; color: #fff; margin-top: 8px; font-family: 'Plus Jakarta Sans';
+        }
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); background: rgba(0,0,0,0.7); }
+
+        /* --- ACCORDION --- */
+        .acc-item { margin-bottom: 10px; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); overflow: hidden; }
+        .acc-head { padding: 18px 25px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
+        .acc-head:hover { background: rgba(0, 229, 255, 0.05); color: var(--accent); }
+        .acc-body { max-height: 0; opacity: 0; overflow: hidden; transition: var(--transition); background: rgba(0,0,0,0.2); }
+        .acc-item.open .acc-body { max-height: 1000px; opacity: 1; padding: 15px; border-top: 1px solid var(--border); }
+
+        .law-item { padding: 12px 18px; margin-bottom: 6px; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; font-size: 13px; border: 1px solid transparent; }
+        .law-item:hover { background: rgba(255,255,255,0.05); transform: scale(1.02); }
+        .law-item.selected { border-color: var(--accent); background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 15px var(--accent-glow); }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2 style="margin:0; letter-spacing:4px; color:var(--accent)">WEXIANO MDT</h2>
+        <p style="color:#64748b; font-size:11px; margin-bottom:30px; letter-spacing:1px;">SECURE ACCESS PROTOCOL</p>
+        <input type="text" id="offName" placeholder="NAMA PETUGAS" style="text-align: center; margin-bottom:12px;">
+        <input type="text" id="offRank" placeholder="PANGKAT" style="text-align: center; margin-bottom:12px;">
+        <input type="text" id="offDiv" placeholder="DIVISI" style="text-align: center; margin-bottom:12px;">
+        <input type="password" id="passCode" placeholder="PASSCODE" style="text-align: center; margin-bottom:25px;">
+        <button class="btn btn-neon-blue" onclick="doLogin()" style="width:100%">INITIALIZE LOGIN</button>
+    </div>
+</div>
+
+<div id="mainApp">
+    <div class="wrapper">
+        <aside class="sidebar">
+            <div style="font-weight: 800; color: var(--accent); font-size: 18px; margin-bottom: 40px; padding: 0 10px; letter-spacing: 1px;">
+                🛡️ POLICE<br><span style="color:white">WEXIANO</span>
+            </div>
+            <nav style="flex: 1;">
+                <button class="nav-link active" onclick="nav('dash', this)">DASHBOARD</button>
+                <button class="nav-link" onclick="nav('calc', this)">BUAT LAPORAN</button>
+                <button class="nav-link" onclick="nav('blist', this)">BLACKLIST</button>
+                <button class="nav-link" onclick="nav('logs', this)">ARSIP MDT</button>
+                <button class="nav-link" onclick="nav('set', this)">PENGATURAN</button>
+            </nav>
+            <div id="userBadge" style="padding:15px; font-size:11px; border: 1px solid var(--accent); border-radius:15px; margin-bottom:15px; color:var(--accent); text-align: center; background: rgba(0,229,255,0.05);">
+                UNIT: -
+            </div>
+            <button class="btn btn-neon-red" style="width:100%; border-radius: 12px;" onclick="doLogout()">OFF DUTY</button>
+        </aside>
+
+        <main class="content">
+            <div id="dash" class="page active">
+                <h2 style="margin-top:0">Selamat Bertugas.</h2>
+                <div class="card" style="border-left: 5px solid var(--accent); background: linear-gradient(90deg, rgba(0,229,255,0.05), transparent);">
+                    <p style="margin: 5px 0;">Petugas: <b id="displayOff" style="color:var(--accent)">-</b></p>
+                    <p style="margin: 5px 0; font-size: 14px; color: #94a3b8;"><span id="displayRank">-</span> | <span id="displayDiv">-</span></p>
+                </div>
+            </div>
+
+            <div id="calc" class="page">
+                <h3 style="margin-top:0">Laporan Penangkapan</h3>
+                <div class="card">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div><small style="color:var(--accent); font-weight:800">LOKASI</small><input id="fLokasi" placeholder="Lokasi"></div>
+                        <div><small style="color:var(--accent); font-weight:800">KEJAHATAN</small><input id="fKejahatan" placeholder="Jenis Kejahatan"></div>
+                        <div><small style="color:var(--accent); font-weight:800">NAMA LENGKAP</small><input id="fNama" placeholder="Tersangka"></div>
+                        <div><small style="color:var(--accent); font-weight:800">PID</small><input id="fPid" placeholder="ID"></div>
+                    </div>
+                    <textarea id="fKronologi" placeholder="Kronologi Singkat..." rows="3" style="margin-top:15px;"></textarea>
+                </div>
+
+                <div class="card" style="display:flex; justify-content: space-around; align-items: center; background: rgba(0,229,255,0.05);">
+                    <div style="text-align:center">
+                        <small>TOTAL DENDA</small>
+                        <div id="vFine" style="font-size:28px; font-weight:800; color:var(--accent)">$0</div>
+                    </div>
+                    <div style="width:1px; height:40px; background:var(--border)"></div>
+                    <div style="text-align:center">
+                        <small>MASA TAHANAN</small>
+                        <div id="vTime" style="font-size:28px; font-weight:800; color:#fbbf24">0 <small>Bulan</small></div>
+                    </div>
+                </div>
+
+                <button class="btn btn-neon-blue" style="width:100%; padding:20px; font-size:13px;" onclick="submitReport()">PROSES & KIRIM KE DISCORD</button>
+                <div id="lawAcc" style="margin-top:20px;"></div>
+            </div>
+
+            <div id="blist" class="page"><h2>Blacklist</h2><div id="blTable" class="card">Data Empty</div></div>
+            <div id="logs" class="page"><h2>Arsip Laporan</h2><div id="logTable" class="card">History Empty</div></div>
+            <div id="set" class="page">
+                <h2>Settings</h2>
+                <div class="card">
+                    <small>WEBHOOK DISCORD</small>
+                    <input id="webUrl" placeholder="https://discord.com/api/webhooks/...">
+                    <button class="btn btn-neon-blue" onclick="saveSet()" style="margin-top:15px; width:100%">UPDATE SYSTEM</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    const PASS = "WEXIANO123";
+    let DATA_OFFICER = JSON.parse(localStorage.getItem('mdt_off_smooth')) || null;
+
+    const LAWS = {
+        "A: LALU LINTAS": [{id:'A1', n:'Ugal-ugalan', f:5000, t:5},{id:'A2', n:'Lampu Merah', f:2000, t:0}],
+        "B: TINDAK KRIMINAL": [{id:'B1', n:'Pencurian', f:15000, t:10},{id:'B2', n:'Penyerangan', f:25000, t:15}],
+        "C: NARKOBA & SENPI": [{id:'C1', n:'Senpi Ilegal', f:100000, t:45},{id:'C2', n:'Narkotika', f:150000, t:60}],
+        "D: KEJAHATAN BERAT": [{id:'D1', n:'Perampokan', f:200000, t:90},{id:'D2', n:'Pembunuhan', f:500000, t:300}]
+    };
+
+    let selected = [];
+
+    if(DATA_OFFICER) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        initSystem();
+    }
+
+    function doLogin() {
+        const n = document.getElementById('offName').value, r = document.getElementById('offRank').value,
+              d = document.getElementById('offDiv').value, p = document.getElementById('passCode').value;
+        if(n && r && d && p === PASS) {
+            localStorage.setItem('mdt_off_smooth', JSON.stringify({ name: n, rank: r, div: d }));
+            location.reload();
+        } else { alert("Data Salah!"); }
+    }
+
+    function doLogout() { if(confirm("Off Duty?")) { localStorage.removeItem('mdt_off_smooth'); location.reload(); } }
+
+    function initSystem() {
+        document.getElementById('displayOff').innerText = DATA_OFFICER.name;
+        document.getElementById('displayRank').innerText = DATA_OFFICER.rank;
+        document.getElementById('displayDiv').innerText = DATA_OFFICER.div;
+        document.getElementById('userBadge').innerText = "UNIT: " + DATA_OFFICER.name;
+        document.getElementById('webUrl').value = localStorage.getItem('mdt_web_smooth') || "";
+        renderLaws();
+    }
+
+    function nav(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function renderLaws() {
+        const cont = document.getElementById('lawAcc'); cont.innerHTML = "";
+        for(let cat in LAWS) {
+            const div = document.createElement('div'); div.className = "acc-item";
+            div.innerHTML = `<div class="acc-head" onclick="this.parentElement.classList.toggle('open')">${cat} <span>▼</span></div>
+                <div class="acc-body">${LAWS[cat].map(l => `<div class="law-item" onclick="toggleLaw(this, '${l.id}', '${l.n}', ${l.f}, ${l.t})"><span><b>${l.id}</b> ${l.n}</span><span>$${l.f.toLocaleString()} | ${l.t} Bln</span></div>`).join('')}</div>`;
+            cont.appendChild(div);
+        }
+    }
+
+    function toggleLaw(el, id, n, f, t) {
+        const idx = selected.findIndex(s => s.id === id);
+        if(idx > -1) { selected.splice(idx,1); el.classList.remove('selected'); }
+        else { selected.push({id,n,f,t}); el.classList.add('selected'); }
+        let tf = 0, tt = 0; selected.forEach(s => { tf += s.f; tt += s.t; });
+        document.getElementById('vFine').innerText = "$" + tf.toLocaleString();
+        document.getElementById('vTime').innerHTML = `${tt} <small>Bulan</small>`;
+    }
+
+    async function submitReport() {
+        const url = document.getElementById('webUrl').value;
+        if(!url || selected.length === 0) return alert("Lengkapi data dan pasal!");
+        
+        const data = {
+            noLap: "LPR-" + Math.floor(Math.random() * 9999),
+            tgl: new Date().toLocaleString('id-ID'),
+            lokasi: document.getElementById('fLokasi').value,
+            kejahatan: document.getElementById('fKejahatan').value,
+            nama: document.getElementById('fNama').value,
+            pid: document.getElementById('fPid').value,
+            kronologi: document.getElementById('fKronologi').value,
+            pasal: selected.map(s => `[${s.id}] ${s.n}`).join(", "),
+            denda: document.getElementById('vFine').innerText,
+            tahanan: document.getElementById('vTime').innerText
+        };
+
+        const totalLap = (JSON.parse(localStorage.getItem('mdt_logs_smooth')) || []).length + 1;
+
+        const content = `# LAPORAN PENANGKAPAN\n\n### I. INFORMASI DASAR\nNo. Laporan: ${data.noLap}\nTanggal: ${data.tgl}\nLokasi: ${data.lokasi}\nKejahatan: ${data.kejahatan}\n\n### II. DATA TERSANGKA\nNama: ${data.nama} (ID: ${data.pid})\n\n### III. KRONOLOGI\n${data.kronologi}\n\n### IV. PUTUSAN\nPasal: ${data.pasal}\nTahanan: ${data.tahanan}\nDenda: ${data.denda}\n\n### V. DATA PETUGAS\nNama: ${DATA_OFFICER.name}\nPangkat: ${DATA_OFFICER.rank}\nTotal Laporan: ${totalLap}`;
+
+        await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: content }) });
+        
+        let logs = JSON.parse(localStorage.getItem('mdt_logs_smooth') || "[]");
+        logs.push({ name: data.nama, f: data.denda, t: data.tahanan });
+        localStorage.setItem('mdt_logs_smooth', JSON.stringify(logs));
+        
+        alert("Laporan Berhasil Terkirim!");
+        location.reload();
+    }
+
+    function saveSet() { localStorage.setItem('mdt_web_smooth', document.getElementById('webUrl').value); alert("System Updated!"); }
+</script>
+</body>
+</html>
